@@ -5,7 +5,12 @@
 // that has to be able to do those actions
 
 object Actions extends Enumeration {
-    val RUNNING, STOPPED, FLYING, DRIVING, SAILING = Value
+    val FLYING, DRIVING, SAILING = Value
+}
+
+trait Transformer extends Car with Plane with Ship {
+    protected var poweredEngine = false
+    protected var action: Actions.Value = Actions.DRIVING // Default action when its engine is turned on
 }
 
 trait Car {
@@ -20,13 +25,9 @@ trait Ship {
     def sail;
 }
 
-abstract class DefaultAction(action: Actions.Value){
-    // Watch if engine has been turned on or not
-    protected var poweredEngine = false
-}
 
-
-class ChittyChittyBangBang(var action: Actions.Value) extends DefaultAction(action) with Car with Plane with Ship {
+class ChittyChittyBangBang extends Transformer {
+    
     // Only affects in those status that requires the engine has to be turned on
     private def statusOnEngine(act: Actions.Value): Unit = {
         if(poweredEngine == true) {
@@ -47,44 +48,38 @@ class ChittyChittyBangBang(var action: Actions.Value) extends DefaultAction(acti
     }
 
     private def changeStatus(act: Actions.Value): Unit = act match {
-        case Actions.STOPPED => {
-            if(poweredEngine == false) {
-                println("The engine is already off")
-            } else {
-                println("Turning off the engine")
-                poweredEngine = false;
-                action = Actions.STOPPED
-                println("The engine has been turned off successfully")
-            }
-        }
-        case Actions.RUNNING => {
-            if(poweredEngine == true) {
-                println("The engine is already on")
-            } else {
-                println("Turning on the engine")
-                poweredEngine = true;
-                action = Actions.RUNNING
-                println("The engine has been turned on successfully")
-            }
-        }
         case Actions.DRIVING => statusOnEngine(act)
         case Actions.FLYING => statusOnEngine(act)
         case Actions.SAILING => statusOnEngine(act)
     }
-    
-    def stop(): Unit = changeStatus(Actions.STOPPED)
 
-    def run(): Unit = changeStatus(Actions.RUNNING)
+    def stop(): Unit = {
+        if (poweredEngine == false) {
+            return println("The engine is already off")
+        }
+
+        poweredEngine = false
+        action = Actions.DRIVING
+        println("The engine is turned off!")
+    }
+
+    def run(): Unit = {
+        if (poweredEngine == true) {
+            return println("The engine is already on")
+        }
+
+        poweredEngine == true
+        println("The engine is turned on!")
+    }
 
     def drive(): Unit = changeStatus(Actions.DRIVING)
     
     def fly(): Unit = changeStatus(Actions.FLYING)
     
     def sail(): Unit = changeStatus(Actions.SAILING)
+
     
     def status(): Unit = action match {
-        case Actions.STOPPED => println("Stopped!")
-        case Actions.RUNNING => println("Running!")
         case Actions.DRIVING => println("Driving!")
         case Actions.FLYING => println("Flying!")
         case Actions.SAILING => println("Sailing!")
@@ -94,6 +89,6 @@ class ChittyChittyBangBang(var action: Actions.Value) extends DefaultAction(acti
 
 object MainObject extends App {
     override def main(args: Array[String]): Unit = {
-        val ccbb = new ChittyChittyBangBang(Actions.STOPPED)
+        val ccbb = new ChittyChittyBangBang()
     }
 }

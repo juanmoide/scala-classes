@@ -17,6 +17,14 @@ trait Engine {
         case FLYING => status = Option(FLYING)
         case SAILING => status = Option(SAILING)
     }
+
+    def turnOff(): Unit = status match {
+        case None => println("The engine is already turned off")
+        case Some(x) => {
+            status = None
+            println("Engine turned off")
+        } 
+    }
 }
 
 trait Car extends Engine {
